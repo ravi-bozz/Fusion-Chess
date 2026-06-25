@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fusion Chess</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="left-panel">
+        <div class="title-row">
+          <div>
+            <h1>Fusion Chess</h1>
+            <p id="statusText">White to move</p>
+          </div>
+          <button id="undoBtn" class="icon-button" title="Undo last move">Undo</button>
+        </div>
+
+        <div class="board-wrap">
+          <div id="board" class="board" aria-label="Chess board"></div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="turn-card">
+          <h2>Special Moves</h2>
+          <div class="ability-grid">
+            <button id="fusionBtn" class="ability">
+              <strong>Fusion Move</strong>
+              <span id="fusionState">Available</span>
+            </button>
+            <button id="resurrectBtn" class="ability" disabled>
+              <strong>Resurrection Swap</strong>
+              <span id="resurrectState">Capture first</span>
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Captured</h2>
+          <div class="captured-list">
+            <div>
+              <h3>By White</h3>
+              <div id="capturedWhite" class="captured"></div>
+            </div>
+            <div>
+              <h3>By Black</h3>
+              <div id="capturedBlack" class="captured"></div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Move History</h2>
+          <ol id="history" class="history"></ol>
+        </section>
+      </aside>
+    </main>
+
+    <dialog id="choiceDialog" class="dialog">
+      <h2 id="dialogTitle">Choose</h2>
+      <p id="dialogText"></p>
+      <div class="dialog-actions" id="dialogActions"></div>
+    </dialog>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
