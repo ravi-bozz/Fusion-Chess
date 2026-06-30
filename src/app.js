@@ -10,6 +10,7 @@ let selected = null;
 let legalMoves = [];
 let fusionMode = false;
 let fusionSelection = [];
+let resurrectionArmed = { [WHITE]: false, [BLACK]: false };
 let remoteSession = null;
 let pollTimer = null;
 
@@ -44,7 +45,17 @@ fusionBtn.addEventListener("click", () => {
   render();
 });
 
-resurrectBtn.addEventListener("click", () => openResurrectionChoice());
+resurrectBtn.addEventListener("click", () => {
+  if (!canAct()) return;
+  if (engine.state.pendingResurrection) {
+    openResurrectionChoice();
+    return;
+  }
+  const player = engine.state.players[engine.state.turn];
+  if (player.resurrectionUsed || engine.state.winner || engine.state.draw) return;
+  resurrectionArmed[engine.state.turn] = !resurrectionArmed[engine.state.turn];
+  render();
+});
 
 undoBtn.addEventListener("click", () => {
   if (remoteSession) return showMessage("Remote game", "Undo is disabled in remote mode.");
@@ -110,21 +121,21 @@ function render() {
   fusionBtn.disabled = !canAct() || player.fusionUsed || !!state.pendingResurrection || !!state.winner || state.draw;
   fusionBtn.classList.toggle("active", fusionMode);
   fusionState.textContent = player.fusionUsed ? "Used" : fusionMode ? "Select two pieces" : "Available";
-  resurrectBtn.disabled = !state.pendingResurrection || !canAct();
+  resurrectBtn.disabled = !canAct() || player.resurrectionUsed || !!state.winner || state.draw;
+  resurrectBtn.classList.toggle("active", resurrectionArmed[actorColor] && !state.pendingResurrection);
   resurrectState.textContent = state.players[state.pendingResurrection?.color ?? state.turn].resurrectionUsed
     ? "Used"
-    : state.pendingResurrection ? "Available now" : "Capture first";
+    : state.pendingResurrection ? "Use or decline" : resurrectionArmed[actorColor] ? "Armed" : "Arm before capture";
   capturedWhite.innerHTML = capturedMarkup(state.players[WHITE].captured);
   capturedBlack.innerHTML = capturedMarkup(state.players[BLACK].captured);
   historyEl.innerHTML = state.moveHistory.map((entry) => `<li>${entry.notation}</li>`).join("");
   undoBtn.disabled = !!remoteSession;
   updateRemoteStatus();
-  if (state.pendingResurrection) openResurrectionChoice();
 }
 
 function onSquareClick(square) {
   if (!canAct()) return;
-  if (engine.state.pendingResurrection) return openResurrectionChoice();
+  if (engine.state.pendingResurrection) return;
   if (fusionMode) return handleFusionSelection(square);
   const piece = engine.state.board.get(square);
   if (selected && legalMoves.some((move) => sameSquare(move.to, square))) {
@@ -167,6 +178,7 @@ async function completeMove(from, to) {
     selected = null;
     legalMoves = [];
     render();
+    maybeOpenArmedResurrection();
   } catch (error) {
     showMessage("Illegal move", error.message);
   }
@@ -200,6 +212,7 @@ async function finishPromotion(from, to, type) {
   selected = null;
   legalMoves = [];
   render();
+  maybeOpenArmedResurrection();
 }
 
 function openFusionDestinationChoice() {
@@ -228,20 +241,30 @@ async function finishFusion(destination) {
 function openResurrectionChoice() {
   const pending = engine.state.pendingResurrection;
   if (!pending || dialog.open || !canAct()) return;
+  resurrectionArmed[pending.color] = false;
   openDialog("Resurrection Swap", `Sacrifice your capturing piece and revive the captured ${pieceName(pending.captured)} as your own?`, [
     ["Use", async () => {
       dialog.close();
       if (remoteSession) await sendRemoteAction({ type: "resurrect" });
       else engine.activateResurrectionSwap();
+      resurrectionArmed[pending.color] = false;
       render();
     }],
     ["Decline", async () => {
       dialog.close();
       if (remoteSession) await sendRemoteAction({ type: "declineResurrection" });
       else engine.declineResurrectionSwap();
+      resurrectionArmed[pending.color] = false;
       render();
     }]
   ]);
+}
+
+function maybeOpenArmedResurrection() {
+  const pendingColor = engine.state.pendingResurrection?.color;
+  if (pendingColor && resurrectionArmed[pendingColor] && canAct()) {
+    openResurrectionChoice();
+  }
 }
 
 async function createRemoteRoom() {
@@ -300,6 +323,7 @@ function applyRemoteRoom(room) {
   legalMoves = [];
   fusionMode = false;
   fusionSelection = [];
+  if (engine.state.players[remoteSession.color]?.resurrectionUsed) resurrectionArmed[remoteSession.color] = false;
   roomCodeInput.value = room.code;
   render();
 }

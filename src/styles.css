@@ -503,16 +503,48 @@ body.is-fullscreen h1 {
 }
 
 @media (max-width: 880px) {
+  body {
+    min-height: 100svh;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
+    gap: 14px;
+    width: min(100vw - 16px, 720px);
+    padding: 10px 0 16px;
+  }
+
+  .title-row {
+    margin-bottom: 10px;
   }
 
   .board-wrap {
     width: 100%;
+    padding: 8px;
+    border-radius: 14px;
   }
 
   body.is-fullscreen .board-wrap {
     width: 100%;
+  }
+
+  .side-panel {
+    gap: 10px;
+  }
+
+  .side-panel section,
+  .turn-card {
+    padding: 12px;
+  }
+
+  .remote-actions,
+  .ability-grid,
+  .captured-list {
+    gap: 8px;
+  }
+
+  .history {
+    max-height: 150px;
   }
 }
 
@@ -529,5 +561,90 @@ body.is-fullscreen h1 {
 
   .top-actions .icon-button {
     flex: 1;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  h3,
+  .remote-status {
+    font-size: 12px;
+  }
+
+  #statusText {
+    width: 100%;
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+
+  .board-wrap {
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .board {
+    border-radius: 8px;
+  }
+
+  .square::before,
+  .square[data-y="7"]::after {
+    font-size: 9px;
+  }
+
+  .piece {
+    font-size: 36px;
+  }
+
+  .fusion-symbol {
+    font-size: 24px;
+  }
+
+  .fusion-label {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+
+  .join-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ability,
+  .icon-button,
+  .dialog-actions button,
+  .join-row input {
+    min-height: 42px;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .ability {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ability span {
+    white-space: normal;
+  }
+
+  .captured {
+    min-height: 26px;
+    font-size: 22px;
+  }
+
+  .captured span {
+    min-width: 26px;
+    height: 26px;
+  }
+
+  .dialog {
+    padding: 14px;
   }
 }
