@@ -1,8 +1,8 @@
 import { ChessEngine, TYPES, WHITE, BLACK, pieceName, sameSquare, squareName } from "./engine.js";
 
 const symbols = {
-  white: { king: "♔", queen: "♕", rook: "♖", bishop: "♗", knight: "♘", pawn: "♙" },
-  black: { king: "♚", queen: "♛", rook: "♜", bishop: "♝", knight: "♞", pawn: "♟" }
+  white: { king: "&#9812;", queen: "&#9813;", rook: "&#9814;", bishop: "&#9815;", knight: "&#9816;", pawn: "&#9817;" },
+  black: { king: "&#9818;", queen: "&#9819;", rook: "&#9820;", bishop: "&#9821;", knight: "&#9822;", pawn: "&#9823;" }
 };
 
 const engine = new ChessEngine();
@@ -56,6 +56,8 @@ function render() {
       cell.className = `square ${(x + y) % 2 ? "dark" : "light"}`;
       cell.dataset.x = x;
       cell.dataset.y = y;
+      cell.dataset.file = "abcdefgh"[x];
+      cell.dataset.rank = 8 - y;
       cell.setAttribute("aria-label", `${squareName(square)} ${piece ? pieceName(piece) : "empty"}`);
       cell.draggable = !!piece && piece.color === engine.state.turn && !engine.state.pendingResurrection;
       if (selected && sameSquare(selected, square)) cell.classList.add("selected");
@@ -213,14 +215,28 @@ function showMessage(titleText, bodyText) {
 
 function pieceMarkup(piece) {
   if (piece.type === TYPES.FUSION) {
+    const [first, second] = piece.components;
     const letters = piece.components.map((type) => type[0].toUpperCase()).join("");
-    return `<span class="piece fusion-piece ${piece.color}">F<span>${letters}</span></span>`;
+    return `
+      <span class="piece fusion-piece ${piece.color}" title="${pieceName(piece)}">
+        <span class="fusion-ring"></span>
+        <span class="fusion-symbol primary">${symbols[piece.color][first]}</span>
+        <span class="fusion-symbol secondary">${symbols[piece.color][second]}</span>
+        <span class="fusion-label">${letters}</span>
+      </span>
+    `;
   }
   return `<span class="piece ${piece.color}">${symbols[piece.color][piece.type]}</span>`;
 }
 
 function capturedMarkup(pieces) {
-  return pieces.map((piece) => `<span title="${pieceName(piece)}">${piece.type === TYPES.FUSION ? "F" : symbols[piece.color][piece.type]}</span>`).join("");
+  return pieces.map((piece) => {
+    if (piece.type === TYPES.FUSION) {
+      const [first, second] = piece.components;
+      return `<span class="captured-fusion" title="${pieceName(piece)}">${symbols[piece.color][first]}${symbols[piece.color][second]}</span>`;
+    }
+    return `<span title="${pieceName(piece)}">${symbols[piece.color][piece.type]}</span>`;
+  }).join("");
 }
 
 function title(value) {
