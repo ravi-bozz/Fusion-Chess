@@ -458,6 +458,45 @@ export function title(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+export function reviveGameState(data) {
+  const state = Object.create(GameState.prototype);
+  state.board = new Board(data.board.grid.map((row) => row.map(revivePiece)));
+  state.players = {
+    [WHITE]: revivePlayer(data.players[WHITE]),
+    [BLACK]: revivePlayer(data.players[BLACK])
+  };
+  state.turn = data.turn;
+  state.moveHistory = data.moveHistory ?? [];
+  state.snapshots = [];
+  state.pendingResurrection = data.pendingResurrection ? {
+    color: data.pendingResurrection.color,
+    square: { ...data.pendingResurrection.square },
+    captured: revivePiece(data.pendingResurrection.captured),
+    sacrificedId: data.pendingResurrection.sacrificedId
+  } : null;
+  state.winner = data.winner ?? null;
+  state.draw = data.draw ?? false;
+  state.message = data.message ?? "White to move";
+  state.enPassantTarget = data.enPassantTarget ? { ...data.enPassantTarget } : null;
+  return state;
+}
+
+function revivePlayer(data) {
+  const player = new Player(data.color);
+  player.resurrectionUsed = data.resurrectionUsed;
+  player.fusionUsed = data.fusionUsed;
+  player.captured = (data.captured ?? []).map(revivePiece);
+  return player;
+}
+
+function revivePiece(data) {
+  if (!data) return null;
+  if (data.type === TYPES.FUSION) {
+    return new FusionPiece(data.color, data.components, { id: data.id, hasMoved: data.hasMoved });
+  }
+  return new Piece(data.type, data.color, { id: data.id, hasMoved: data.hasMoved });
+}
+
 function dedupeMoves(moves) {
   const seen = new Set();
   return moves.filter((move) => {

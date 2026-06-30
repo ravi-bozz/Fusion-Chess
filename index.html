@@ -14,7 +14,10 @@
             <h1>Fusion Chess</h1>
             <p id="statusText">White to move</p>
           </div>
-          <button id="undoBtn" class="icon-button" title="Undo last move">Undo</button>
+          <div class="top-actions">
+            <button id="fullscreenBtn" class="icon-button" title="Enter fullscreen">Fullscreen</button>
+            <button id="undoBtn" class="icon-button" title="Undo last move">Undo</button>
+          </div>
         </div>
 
         <div class="board-wrap">
@@ -23,6 +26,18 @@
       </section>
 
       <aside class="side-panel">
+        <section class="remote-card">
+          <h2>Remote Two Player</h2>
+          <div class="remote-actions">
+            <button id="createRoomBtn" class="icon-button">Create Room</button>
+            <div class="join-row">
+              <input id="roomCodeInput" maxlength="6" placeholder="Room code" />
+              <button id="joinRoomBtn" class="icon-button">Join</button>
+            </div>
+          </div>
+          <p id="remoteStatus" class="remote-status">Local mode</p>
+        </section>
+
         <section class="turn-card">
           <h2>Special Moves</h2>
           <div class="ability-grid">
